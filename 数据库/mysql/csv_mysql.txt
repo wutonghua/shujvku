@@ -1,0 +1,60 @@
+1,用pandas把csv数据存入mysql
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+import pandas as pd
+from sqlalchemy import create_engine
+import pymysql
+engine = create_engine(str(r"mysql+pymysql://%s:" + '%s' + "@%s/%s?charset=utf8") % ('root', 'wujian', 'localhost', 'yixueziliao'))
+
+try:
+	df = pd.read_csv(r'C:\Users\Administrator\Desktop\data\bingyin.csv')
+	# print(df)
+	df.to_sql('test', con=engine, if_exists='append', index=False)
+except Exception as e:
+	print(e)
+2,第二种方法
+#coding=utf8
+import pandas
+import MySQLdb
+
+def Init():
+    # 连接数据库
+    conn= MySQLdb.connect(
+            host='localhost',
+            port = 3306,
+            user='root',
+            passwd='1234',
+            db ='tianchi_1',
+            charset = 'utf8',       # 不声明编码导入的数据会显示出错
+            )
+    cur = conn.cursor()
+
+    print '正在提取商家数据……'
+    shop_info = pandas.read_csv(r'.\dataset\dataset\shop_info.txt', iterator=True,chunksize=1,header=None,names=['shop_id','city_name','location_id','per_pay','score','comment_cnt','shop_level','cate_1_name','cate_2_name','cate_3_name'])
+    print '正在将数据导入到数据库……'
+    for i,shop in enumerate(shop_info):
+        # 用-1或者''代替空值NAN
+        shop = shop.fillna({'cate_1_name':'','cate_2_name':'','cate_3_name':''})      # 替换字符串空值
+        shop = shop.fillna(-1)      # 替换整数空值
+        shop = shop.values[0]   # Series类型转换成列表类型
+        #print shop
+        sql ="insert into shop_info (`shop_id`,`city_name`,`location_id`,`per_pay`,`score`,`comment_cnt`,`shop_level`,`cate_1_name`,`cate_2_name`,`cate_3_name`) values('%d','%s','%d','%d','%d','%d','%d','%s','%s','%s')"\
+              %(shop[0],shop[1],shop[2],shop[3],shop[4],shop[5],shop[6],shop[7],shop[8],shop[9])
+        cur.execute(sql)
+        print '%d / 2000'%(i+1)
+    conn.commit()
+3,把数据从数据库导出到csv中
+import pymysql
+pymysql.install_as_MySQLdb()
+import MySQLdb
+import pandas as pd
+def load_dataset(name):
+	conn=MySQLdb.Connection(host='localhost', user='root', password='wujian',
+							  port=3306, database='wenyi', charset='utf8')
+	sql = "select * from %s " % name
+	df=pd.read_sql(sql,conn)
+	# print(df.head())
+	return df
+if __name__=="__main__":
+	df=load_dataset('xiaoer_xiaochuan')
+	df.to_csv('小儿哮喘.csv',encoding='utf-8')

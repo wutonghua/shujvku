@@ -1,0 +1,33 @@
+/**学生表*/
+CREATE TABLE student (
+stu_id INT AUTO_INCREMENT,
+NAME VARCHAR(30),
+age INT ,
+class VARCHAR(50),
+address VARCHAR(100),
+PRIMARY KEY(stu_id)
+)
+/*学生课程表*/
+CREATE TABLE Course(
+cour_id INT AUTO_INCREMENT,
+NAME VARCHAR(50),
+CODE VARCHAR(30),
+PRIMARY KEY(cour_id)
+)
+/**学生课程关联表*/
+CREATE TABLE Stu_Cour(
+sc_id INT AUTO_INCREMENT,
+stu_id INT ,
+cour_id INT,
+PRIMARY KEY(sc_id)
+)
+ALTER TABLE Stu_Cour ADD CONSTRAINT stu_FK1 FOREIGN KEY(stu_id) REFERENCES student(stu_id)
+ALTER TABLE Stu_Cour ADD CONSTRAINT cour_FK2 FOREIGN KEY(cour_id) REFERENCES Course(cour_id)
+
+数据库多对多关系的表如何采用左连接查询
+例如病人表（patient）和保险公司表（insurance）是一个多对多的关系，它们的关系通过中间表（insure）来体现。中间表（insure）储存病人的主键id和保险公司的主键company  
+那么请列出所有保险公司的名字，以及在该保险公司投保的所有病人的id  
+以保险公司为基表进行左联接查询：  
+select  i.company,p.id ,i.* from  insurance i   
+         left join  insure pi on i.company = pi.company  
+         left join patient p on pi.id = p.id  
